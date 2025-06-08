@@ -7,7 +7,15 @@ import 'package:provider/provider.dart';
 
 class ResultScreen extends StatelessWidget {
   final InvestInformation result;
-  const ResultScreen({Key? key, required this.result}) : super(key: key);
+  ResultScreen({Key? key, required this.result}) : super(key: key);
+
+  final Map<String, Color> typeColors = {
+    '안정형': Colors.blue[100]!,
+    '안정추구형': Colors.blue,
+    '위험중립형': Colors.blue[700]!,
+    '적극투자형': Colors.blue[800]!,
+    '공격투자형': Colors.black,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -16,26 +24,114 @@ class ResultScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
-              Text(
-                "투자 성향 테스트 결과",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Container(
+                color: Colors.blue,
+                padding: const EdgeInsets.only(top: 40, bottom: 8),
+                child: Center(
+                  child: Text(
+                    "투자 성향 테스트 결과(${result.totalScore.toStringAsFixed(1)}점)",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                "${result.totalScore.toStringAsFixed(1)}점 - 당신의 성향은 「${result.investmentType}」입니다.",
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
+
+              Container(
+                color: Colors.blue,
+                child: Center(
+                  child: Text(
+                    "당신의 성향은 「${result.investmentType}」입니다.",
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+                padding: const EdgeInsets.only(bottom: 40),
               ),
-              const SizedBox(height: 24),
-
-              _buildBarChart(result.investmentType),
-
-              const SizedBox(height: 40),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "투자성향 분류기준",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildBarChart(result.investmentType),
+                    const Text(
+                      "안정형",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text("15점이하", textAlign: TextAlign.left),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "안정추구형",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text("16점 초과 20점이하", textAlign: TextAlign.left),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "위험중립형",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text("21점초과 25점이하", textAlign: TextAlign.left),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "적극투자형",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text("26점 초과 30점 이하", textAlign: TextAlign.left),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "공격투자형",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text("31점 이상", textAlign: TextAlign.left),
+                    const SizedBox(height: 24),
+                    const Text(
+                      "당신의 투자성향",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildInvestmentTypeChart(result.totalScore),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -49,8 +145,8 @@ class ResultScreen extends StatelessWidget {
       MapEntry('안정형', 15.0),
       MapEntry('안정추구형', 20.0),
       MapEntry('위험중립형', 25.0),
-      MapEntry('적극투자형', 22.0),
-      MapEntry('공격투자형', 18.0),
+      MapEntry('적극투자형', 30.0),
+      MapEntry('공격투자형', 35.0),
     ];
 
     return AspectRatio(
@@ -58,7 +154,7 @@ class ResultScreen extends StatelessWidget {
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
-          maxY: 30,
+          maxY: 40,
           barTouchData: BarTouchData(enabled: false),
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
@@ -103,13 +199,68 @@ class ResultScreen extends StatelessWidget {
                   barRods: [
                     BarChartRodData(
                       toY: e.value,
-                      color: isUserType ? Colors.blue : Colors.grey[300],
+                      color: typeColors[e.key]!,
                       borderRadius: BorderRadius.circular(4),
                       width: 20,
                     ),
                   ],
                 );
               }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInvestmentTypeChart(double userScore) {
+    return AspectRatio(
+      aspectRatio: 1.3,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: 130,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      '${result.investmentType}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
+                reservedSize: 50,
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          barGroups: [
+            BarChartGroupData(
+              x: 0,
+              barRods: [
+                BarChartRodData(
+                  toY: userScore,
+                  color: typeColors[result.investmentType],
+                  borderRadius: BorderRadius.circular(4),
+                  width: 20,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

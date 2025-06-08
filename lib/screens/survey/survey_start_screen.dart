@@ -95,7 +95,7 @@ class _SurveyStartScreenState extends State<SurveyStartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: isStarted ? null : const CustomHeader(showBackButton: true),
+      appBar: isStarted ? null : CustomHeader(showBackButton: true),
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xffF7F7F8),
       body:

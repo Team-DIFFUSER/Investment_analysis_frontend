@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/provider/news_provider.dart';
 import 'package:front_end/widgets/custom_bottom_navigation_bar.dart';
 import 'package:front_end/widgets/custom_header.dart';
 import 'package:front_end/widgets/custom_news_list.dart';
+import 'package:provider/provider.dart';
 
 class LatestListScreen extends StatefulWidget {
   const LatestListScreen({super.key});
@@ -14,8 +15,10 @@ class LatestListScreen extends StatefulWidget {
 class _LatestNewsScreenState extends State<LatestListScreen> {
   @override
   Widget build(BuildContext context) {
+    final newsProvider = Provider.of<NewsProvider>(context);
+    final latestNews = newsProvider.latestNews;
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: false,
         showUserIcon: true,
         showBackButton: true,
@@ -28,7 +31,7 @@ class _LatestNewsScreenState extends State<LatestListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomNewsList(
-                newsList: newsList,
+                newsList: latestNews,
                 onTap: (news) {
                   Navigator.pushNamed(context, '/latest', arguments: news);
                 },

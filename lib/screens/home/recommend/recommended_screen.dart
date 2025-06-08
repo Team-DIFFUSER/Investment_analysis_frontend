@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/screens/home/news_data.dart';
 import 'package:front_end/widgets/custom_bottom_navigation_bar.dart';
 import 'package:front_end/widgets/custom_header.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -19,7 +19,7 @@ class _RecommendScreenState extends State<RecommendScreen> {
     final news = widget.news;
 
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: false,
         showUserIcon: true,
         showBackButton: true,
@@ -34,7 +34,7 @@ class _RecommendScreenState extends State<RecommendScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
-                  news.imageUrl,
+                  news.thumbnailUrl,
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
@@ -58,17 +58,14 @@ class _RecommendScreenState extends State<RecommendScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        timeago.format(news.dateTime, locale: 'ko'),
+                        timeago.format(news.pubDate, locale: 'ko'),
                         style: const TextStyle(color: Colors.grey),
                       ),
-                      Text(
-                        news.source,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
+                      Text("출판사", style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(news.content, style: const TextStyle(fontSize: 16)),
+                  Text(news.description, style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ],

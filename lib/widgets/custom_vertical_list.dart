@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/screens/home/news_data.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class CustomVerticalList extends StatelessWidget {
@@ -54,7 +54,7 @@ class CustomVerticalList extends StatelessWidget {
                           top: Radius.circular(12),
                         ),
                         child: Image.network(
-                          news.imageUrl,
+                          news.thumbnailUrl,
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -78,7 +78,7 @@ class CustomVerticalList extends StatelessWidget {
 
                           const SizedBox(height: 12),
                           Text(
-                            news.content,
+                            news.description,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -88,11 +88,11 @@ class CustomVerticalList extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                timeago.format(news.dateTime, locale: 'ko'),
+                                timeago.format(news.pubDate, locale: 'ko'),
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               Text(
-                                news.source,
+                                "신문사",
                                 style: const TextStyle(color: Colors.grey),
                               ),
                             ],

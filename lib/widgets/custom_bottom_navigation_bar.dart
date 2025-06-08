@@ -36,7 +36,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           icon: Icon(Icons.library_books),
           label: "포트폴리오",
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.language), label: "종목추천"),
+        BottomNavigationBarItem(icon: Icon(Icons.language), label: "종목검색"),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: "설정"),
       ],
     );

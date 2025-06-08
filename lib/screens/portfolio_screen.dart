@@ -19,7 +19,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: true,
         showUserIcon: true,
         showBackButton: false,

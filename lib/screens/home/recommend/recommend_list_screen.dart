@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/provider/news_provider.dart';
+import 'package:front_end/screens/home/news_data.dart';
 import 'package:front_end/widgets/custom_bottom_navigation_bar.dart';
 import 'package:front_end/widgets/custom_header.dart';
 import 'package:front_end/widgets/custom_news_list.dart';
+import 'package:provider/provider.dart';
 
 class RecommendListScreen extends StatefulWidget {
   const RecommendListScreen({super.key});
@@ -14,11 +16,11 @@ class RecommendListScreen extends StatefulWidget {
 class _RecommendListScreenState extends State<RecommendListScreen> {
   @override
   Widget build(BuildContext context) {
-    final sortedNewsList = [...newsList]
-      ..sort((a, b) => b.recommendScore.compareTo(a.recommendScore));
+    final newsProvider = Provider.of<NewsProvider>(context);
+    final recommendedNews = newsProvider.recommendedNews;
 
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: false,
         showUserIcon: true,
         showBackButton: true,
@@ -31,7 +33,7 @@ class _RecommendListScreenState extends State<RecommendListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomNewsList(
-                newsList: sortedNewsList,
+                newsList: recommendedNews,
                 onTap: (news) {
                   Navigator.pushNamed(context, '/recommend', arguments: news);
                 },

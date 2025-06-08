@@ -43,7 +43,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
   Widget build(BuildContext context) {
     final question = questionList[widget.questionIndex];
     final int selectOption = (question['selectOption'] as int?) ?? 1;
-    ;
 
     return Scaffold(
       appBar: CustomHeader(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:front_end/provider/news_provider.dart';
 import 'package:front_end/provider/user_provider.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/screens/home/news_data.dart';
 import 'package:front_end/widgets/custom_bottom_navigation_bar.dart';
 import 'package:front_end/widgets/custom_header.dart';
 import 'package:front_end/widgets/custom_horizontal_list.dart';
@@ -20,6 +21,11 @@ class _MainPageState extends State<HomeScreen> {
   void initState() {
     super.initState();
     timeago.setLocaleMessages('ko', timeago.KoMessages());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final newsProvider = Provider.of<NewsProvider>(context, listen: false);
+      newsProvider.fetchNews();
+    });
   }
 
   @override
@@ -28,6 +34,7 @@ class _MainPageState extends State<HomeScreen> {
       context,
       listen: true,
     );
+    final newsProvider = Provider.of<NewsProvider>(context, listen: true);
 
     if (!userProvider.isLogin) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,8 +45,11 @@ class _MainPageState extends State<HomeScreen> {
       });
     }
 
+    final latestNews = newsProvider.latestNews;
+    final recommendedNews = newsProvider.recommendedNews;
+
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: true,
         showUserIcon: true,
         showBackButton: false,
@@ -74,8 +84,7 @@ class _MainPageState extends State<HomeScreen> {
               ),
             ),
             CustomHorizontalList(
-              newsList: List.from(newsList)
-                ..sort((a, b) => b.dateTime.compareTo(a.dateTime)),
+              newsList: latestNews,
               onTap: (news) {
                 Navigator.pushNamed(context, '/latest', arguments: news);
               },
@@ -106,8 +115,7 @@ class _MainPageState extends State<HomeScreen> {
               ),
             ),
             CustomVerticalList(
-              newsList: List.from(newsList)
-                ..sort((a, b) => b.recommendScore.compareTo(a.recommendScore)),
+              newsList: recommendedNews,
               onTap: (news) {
                 Navigator.pushNamed(context, '/recommend', arguments: news);
               },

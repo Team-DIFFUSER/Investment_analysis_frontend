@@ -23,7 +23,7 @@ class _PortfolioScreenState extends State<MarketScreen> {
         }).toList();
 
     return Scaffold(
-      appBar: const CustomHeader(
+      appBar: CustomHeader(
         showLogo: true,
         showUserIcon: true,
         showBackButton: false,

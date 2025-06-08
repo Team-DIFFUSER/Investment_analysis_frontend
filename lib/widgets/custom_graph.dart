@@ -59,6 +59,11 @@ class CustomGraph extends StatelessWidget {
       previousValue,
     );
 
+    final List<FlSpot> adjustedPredictedData = [
+      currentData.last,
+      ...predictedData,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -87,8 +92,8 @@ class CustomGraph extends StatelessWidget {
                       percentageIncrease,
                       style: const TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w200,
-                        color: Color(0xFF22C55E),
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff22C55E),
                       ),
                     ),
                   ],
@@ -162,7 +167,7 @@ class CustomGraph extends StatelessWidget {
                             ),
                           ),
                           LineChartBarData(
-                            spots: predictedData,
+                            spots: [currentData.last, ...predictedData],
                             isCurved: true,
                             gradient: LinearGradient(
                               colors: predictedGradientColors,

@@ -2,25 +2,26 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front_end/screens/loadmydata/asset_info.dart';
 import 'package:front_end/userInfo/invest_information.dart';
 import 'package:front_end/userInfo/users.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
-  late User _userInfo;
+  User? _userInfo;
   late InvestInformation _investInfo;
 
-  bool _loginStat = true;
+  bool _loginStat = false;
   //  bool _loginStat = true; //테스트
 
-  User get userInfo => _userInfo;
+  User? get userInfo => _userInfo;
   InvestInformation get investInfo => _investInfo;
   bool get isLogin => _loginStat;
 
   String? _loginErrorMessage;
   String? get loginErrorMessage => _loginErrorMessage;
 
-  set userInfo(User userInfo) {
+  set userInfo(User? userInfo) {
     _userInfo = userInfo;
   }
 
@@ -39,7 +40,7 @@ class UserProvider extends ChangeNotifier {
     _loginStat = false;
     _loginErrorMessage = null;
 
-    const url = 'http://10.0.2.2:8080/api/users/login';
+    const url = 'http://52.79.34.229/api/users/login';
     final data = {'username': username, 'password': password};
 
     try {
@@ -60,9 +61,18 @@ class UserProvider extends ChangeNotifier {
 
         print("jwt: $jwt");
         await storage.write(key: 'jwt', value: jwt);
+        print("서버 응답 데이터: ${response.data}");
 
-        _userInfo = User.fromMap(response.data);
-        _loginStat = true;
+        final user = await getUserByUsername(username);
+        if (user != null) {
+          _userInfo = user;
+          _loginStat = true;
+          print("로그인 성공 - 사용자 정보: ${_userInfo?.name}, ${_userInfo?.email}");
+        } else {
+          _loginErrorMessage = "사용자 정보를 가져오는 데 실패했습니다.";
+        }
+
+        notifyListeners();
       } else if (response.statusCode == 403) {
         _loginErrorMessage = "비밀번호가 틀렸습니다.";
       } else {
@@ -75,13 +85,13 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(
+  Future<bool> register(
     String username,
     String password,
     String name,
     String email,
   ) async {
-    const url = 'http://10.0.2.2:8080/api/users/register';
+    const url = 'http://52.79.34.229/api/users/register';
     final data = {
       'username': username,
       'password': password,
@@ -96,18 +106,22 @@ class UserProvider extends ChangeNotifier {
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
-      if (response.statusCode == 200) {
-        print('회원가입 성공: ${response.data['username']}');
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        await login(username, password);
+        return true;
       } else {
-        print('회원가입 실패');
+        print('회원가입 실패 - 상태코드: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
       print('회원가입 처리 중 에러발생: $e');
     }
+
+    return false;
   }
 
   Future<bool> checkUsernameExists(String username) async {
-    final url = 'http://10.0.2.2:8080/api/users/exists/$username';
+    final url = 'http://52.79.34.229/api/users/exists/$username';
 
     try {
       final response = await _dio.get(url);
@@ -118,13 +132,12 @@ class UserProvider extends ChangeNotifier {
         throw Exception('아이디 중복 확인 실패');
       }
     } catch (e) {
-      print('아이디 중복 확인 중 에러발생: $e');
       return false;
     }
   }
 
   Future<User> getUserByUsername(String username) async {
-    final url = 'http://10.0.2.2:8080/api/users/$username';
+    final url = 'http://52.79.34.229/api/users/$username';
 
     try {
       final response = await _dio.get(url);
@@ -135,7 +148,6 @@ class UserProvider extends ChangeNotifier {
         throw Exception('아이디 존재 확인 실패');
       }
     } catch (e) {
-      print('아이디 존재 확인 중 에러발생: $e');
       rethrow;
     }
   }
@@ -143,12 +155,11 @@ class UserProvider extends ChangeNotifier {
   Future<InvestInformation?> analyzeInvestmentProfile(
     List<Map<String, int>> responses,
   ) async {
-    const url = 'http://10.0.2.2:8080/api/users/profile';
+    const url = 'http://52.79.34.229/api/users/profile';
 
     try {
       final jwt = await storage.read(key: 'jwt');
       if (jwt == null || jwt.isEmpty) {
-        print("JWT 토큰이 없습니다.");
         return null;
       }
 
@@ -167,9 +178,6 @@ class UserProvider extends ChangeNotifier {
         final decoded =
             response.data is String ? jsonDecode(response.data) : response.data;
         final investInfo = InvestInformation.fromJson(decoded);
-        print(
-          "서버에서 받은 투자성향 결과: ${investInfo.investmentType}, 점수: ${investInfo.totalScore}",
-        );
         return investInfo;
       } else {
         print("투자성향 분석 실패 - 상태코드: ${response.statusCode}");
@@ -181,6 +189,55 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  Future<AssetInfo?> fetchAssetInfo() async {
+    const url = 'http://52.79.34.229/api/assets';
+
+    try {
+      final jwt = await storage.read(key: 'jwt');
+      if (jwt == null || jwt.isEmpty) {
+        print("JWT 없음");
+        return null;
+      }
+
+      final response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $jwt',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data =
+            response.data is String ? jsonDecode(response.data) : response.data;
+        final assetInfo = AssetInfo.fromJson(data);
+        print("자산 평가 조회 성공");
+
+        print("총 추정 자산: ${assetInfo.totalEstimate}");
+        print("총 매입 금액: ${assetInfo.totalPurchase}");
+        print("수익률: ${assetInfo.profitLossRate}");
+        print("보유 종목 수: ${assetInfo.stocks.length}");
+
+        for (var stock in assetInfo.stocks) {
+          print("종목 코드: ${stock.stkCd}");
+          print("종목 이름: ${stock.name}");
+          print("현재가: ${stock.currentPrice}");
+          print("수익률: ${stock.plRate}");
+        }
+
+        return assetInfo;
+      } else {
+        print("자산 조회 실패 - 상태코드: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("자산 조회 중 오류 발생: $e");
+      return null;
+    }
+  }
+
   Future<void> logout() async {
     try {
       await storage.delete(key: 'jwt');
@@ -188,7 +245,6 @@ class UserProvider extends ChangeNotifier {
       _loginStat = false;
       storage.delete(key: 'username');
       final prefs = await SharedPreferences.getInstance();
-      print("로그아웃 성공");
     } catch (e) {
       print("로그아웃 실패 : $e");
     }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/screens/home/news_test_data.dart';
+import 'package:front_end/screens/home/news_data.dart';
 
 class CustomNewsList extends StatelessWidget {
   final List<News> newsList;
@@ -42,7 +42,7 @@ class CustomNewsList extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          news.content,
+                          news.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 13),
@@ -54,7 +54,7 @@ class CustomNewsList extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      news.imageUrl,
+                      news.thumbnailUrl,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
